@@ -12,9 +12,11 @@ class PostController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
     public function index()
     {
-        //
+        $posts = Post::orderBy('id', 'desc')->paginate(3);
+        return view('posts.index', ['posts' => $posts]);
     }
 
     /**
