@@ -81,7 +81,7 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
-        //
+        return view('posts.edit', ['post' => $post]);
     }
 
     /**
@@ -93,7 +93,28 @@ class PostController extends Controller
      */
     public function update(Request $request, Post $post)
     {
-        //
+        $imageName = '';
+        if ($request->hasFile('file')) {
+            $imageName = time() . '.' . $request->file->extension();
+            $request->file->storeAs('public/images', $imageName);
+            if ($post->image) {
+                Storage::delete('public/images/' . $post->image);
+            }
+        } else {
+            $imageName = $post->image;
+        }
+
+      $post->title = $request->title;
+      $post->category = $request->category;
+      $post->content = $request->content;
+      $post->image = $imageName;
+      $post->save();
+
+      // Mass Assignment Way; Can do if add fields in to fillable.
+        // $postData = ['title' => $request->title, 'category' => $request->category, 'content' => $request->content, 'image' => $imageName];
+        // $post->update($postData);
+
+        return redirect('/posts')->with(['message' => 'Post updated successfully!', 'status' => 'success']);
     }
 
     /**
@@ -104,6 +125,8 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
-        //
+        Storage::delete('public/images/' . $post->image);
+        $post->delete();
+        return redirect('/posts')->with(['message' => 'Post deleted successfully!', 'status' => 'info']);
     }
 }
