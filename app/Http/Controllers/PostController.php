@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use Session;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
@@ -37,7 +39,27 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+        'title' => 'required',
+        'category' => 'required',
+        'content' => 'required|min:10',
+        'file' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:5000',
+        ]);
+
+        $imageName = time() . '.' . $request->file->extension();
+
+        $request->file->storeAs('public/images', $imageName);
+
+        $post = new Post();
+
+        $post->title = $request->title;
+        $post->category = $request->category;
+        $post->content = $request->content;
+        $post->image = $imageName;
+
+        $post->save();
+
+      return redirect('/posts')->with(['message' => 'Post added successfully!', 'status' => 'success']);
     }
 
     /**
